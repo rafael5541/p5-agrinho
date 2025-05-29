@@ -13,6 +13,7 @@ function preloadLabirinto() {
   }
 }
 
+// Por alguma razão, o som buga depois de algum tempo. Ai eu só carrego várias vezes o mesmo som, e dou play.
 let somIndex = 0;
 
 function tocarSomDesarmar() {
