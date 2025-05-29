@@ -25,6 +25,7 @@ Você explora um labirinto, rega vegetais e tira armadilhas!
 - **Projetos open-source da Unity** – Pela inspiração na criação visual das paredes em 3D.
 - **Stack Overflow** – Por sempre ter uma resposta quando o código quebra, kk.
 - **mystman12** - Por criar a textura de milho usada. (fonte: https://baldis-basics-in-education-and-learning.fandom.com/wiki/Farm?file=Corn.png)
+- **Pixabay** - Pela maioria dos sons usados. (todos são royalty-free.)
 
 ## Programas usados
 
