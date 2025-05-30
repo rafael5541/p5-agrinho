@@ -1,4 +1,8 @@
-// Código para fazer o menu de opções. Usa o index.html para a visualização.
+// Código para fazer o menu de opções e o HUD. Usa o index.html para a visualização.
+let duracaoEmSegundos = 300;
+let tempoRestante = duracaoEmSegundos;
+let intervaloTimer;
+let timerAtivo = false;
 
 class Menu {
   constructor() {
@@ -70,4 +74,55 @@ class Menu {
     this.sensSlider.value = camera.sens || 0.002;
     this.sensValue.textContent = (camera.sens || 0.002).toFixed(4);
   }
+}
+
+function atualizarHUDPlantas() {
+  const total = grade.filter((c) => c.ePlanta).length;
+  const regadas = grade.filter((c) => c.ePlanta && c.plantaRegada).length;
+
+  const hud = document.getElementById("plantas-hud");
+  hud.textContent = `Plantas: ${regadas}/${total}`;
+}
+
+function iniciarTimerRegressivo(minutos = 5) {
+  duracaoEmSegundos = minutos * 60;
+  tempoRestante = duracaoEmSegundos;
+  timerAtivo = true;
+  atualizarTimerHUD();
+
+  intervaloTimer = setInterval(() => {
+    if (!timerAtivo) return;
+
+    tempoRestante--;
+
+    if (tempoRestante <= 0) {
+      tempoRestante = 0;
+      pararTimerRegressivo();
+      fimDeJogo();
+    }
+
+    atualizarTimerHUD();
+  }, 1000);
+}
+
+function pararTimerRegressivo() {
+  timerAtivo = false;
+  clearInterval(intervaloTimer);
+}
+
+function atualizarTimerHUD() {
+  const minutos = Math.floor(tempoRestante / 60)
+    .toString()
+    .padStart(2, "0");
+  const segundos = (tempoRestante % 60).toString().padStart(2, "0");
+  const timerHud = document.getElementById("timer-hud");
+
+  if (timerHud) {
+    timerHud.textContent = `Tempo restante: ${minutos}:${segundos}`;
+  }
+}
+
+function fimDeJogo() {
+  noLoop();
+  alert("Tempo esgotado! Você perdeu.");
 }
