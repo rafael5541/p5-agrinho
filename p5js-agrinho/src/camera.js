@@ -164,4 +164,10 @@ class Camera {
     let celulaAtual = grade[index(iAtual, jAtual)];
     if (celulaAtual) celulaAtual.desarmarTrap();
   }
+  regarPlantaComMouse() {
+    let iAtual = floor(this.pos.x / this.tamanho);
+    let jAtual = floor(this.pos.z / this.tamanho);
+    let celulaAtual = grade[index(iAtual, jAtual)];
+    if (celulaAtual) celulaAtual.regarPlanta();
+  }
 }
