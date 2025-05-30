@@ -26,6 +26,11 @@ Você explora um labirinto, rega vegetais e tira armadilhas!
 - **Stack Overflow** – Por sempre ter uma resposta quando o código quebra, kk.
 - **mystman12** - Por criar a textura de milho usada. (fonte: https://baldis-basics-in-education-and-learning.fandom.com/wiki/Farm?file=Corn.png)
 - **Pixabay** - Pela maioria dos sons usados. (todos são royalty-free.)
+### Créditos de imagens
+- Armadilha de urso: https://www.artstation.com/artwork/6bJ0g5
+- Drone: https://pxhere.com/nl/photo/1454487
+- Fundo para o level dia: https://www.flickr.com/photos/8525214@N06/6055469523/ (modificado com Photopea para deixar mais claro.)
+- Milho: https://baldis-basics-in-education-and-learning.fandom.com/wiki/Farm?file=Corn.png
 
 ## Programas usados
 
