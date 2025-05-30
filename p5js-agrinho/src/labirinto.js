@@ -2,12 +2,14 @@
 // Código para o transformar em 3d feito por mim, com inspiração de vários projetos da Unity.
 
 let imgMilho;
+let imgDrone;
 let imgArmadilha;
 let sonsDesarmar = [];
 
 function preloadLabirinto() {
   imgMilho = loadImage("assets/milho.png");
   imgArmadilha = loadImage("assets/armadilha.png");
+  imgDrone = loadImage("assets/drone.png");
   for (let i = 0; i < 10; i++) {
     sonsDesarmar.push(loadSound("assets/desarmar.mp3"));
   }
@@ -34,6 +36,8 @@ class Celula {
     this.temTrap = false;
     this.trapDesarmada = false;
     this.foiPisado = false;
+    this.ePlanta = false;
+    this.plantaRegada = false;
   }
 
   mostrar() {
@@ -91,6 +95,7 @@ class Celula {
       pop();
     }
 
+    // Passos
     if (this.foiPisado) {
       push();
       translate(0, tamanho / 2 + 0.05, 0);
@@ -103,6 +108,7 @@ class Celula {
       pop();
     }
 
+    // Trap
     if (this.temTrap && !this.trapDesarmada) {
       push();
       fill("red");
@@ -113,6 +119,16 @@ class Celula {
       drawingContext.polygonOffset(-1, -1);
       box(tamanho * 0.4, 2, tamanho * 0.4);
       drawingContext.disable(drawingContext.POLYGON_OFFSET_FILL);
+      pop();
+    }
+
+    // Planta
+    if (this.ePlanta && !this.plantaRegada) {
+      push();
+      translate(0, tamanho / 2 + 5, 0);
+      fill("red");
+      noStroke();
+      sphere(tamanho * 0.2);
       pop();
     }
 
@@ -154,6 +170,13 @@ class Celula {
   desarmarTrap() {
     if (this.temTrap && !this.trapDesarmada) {
       this.trapDesarmada = true;
+      tocarSomDesarmar();
+    }
+  }
+  regarPlanta() {
+    if (this.ePlanta && !this.plantaRegada) {
+      this.plantaRegada = true;
+      if (typeof atualizarHUDPlantas === "function") atualizarHUDPlantas();
       tocarSomDesarmar();
     }
   }
@@ -213,8 +236,9 @@ function adicionarTraps(quantidade) {
     let i = floor(random(colunas));
     let j = floor(random(linhas));
     let cel = grade[index(i, j)];
-    if (cel && !cel.temTrap) {
+    if (cel && !cel.temTrap && !cel.ePlanta) {
       cel.temTrap = true;
+      n++;
     }
   }
 }
@@ -223,5 +247,15 @@ function marcarPasso(i, j) {
   let cel = grade[index(i, j)];
   if (cel) {
     cel.foiPisado = true;
+  }
+}
+
+function detectarDeadEnds() {
+  for (let cel of grade) {
+    if (cel.i === 0 && cel.j === 0) continue;
+    let aberturas = cel.paredes.filter((p) => !p).length;
+    if (aberturas === 1) {
+      cel.ePlanta = true;
+    }
   }
 }
