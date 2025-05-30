@@ -11,10 +11,7 @@ let atual;
 let pilha = [];
 let passos = new Set();
 let noclip = false;
-
-function preload() {
-  fonte = loadFont("assets/Type Machine.ttf");
-}
+let drones = [];
 
 function keyPressed() {
   if (key === "p" || key === "P") {
@@ -60,8 +57,17 @@ function setup() {
   atual = grade[0];
   gerarLabirinto();
   adicionarTraps(50);
+  detectarDeadEnds();
+  atualizarHUDPlantas();
+  iniciarTimerRegressivo(3);
   sonsPasso = [passo2, passo1, passo3];
   menu.aplicarConfiguracoes(cam);
+  // Cria os drones.
+  for (let i = 0; i < 60; i++) {
+    let x = random(colunas * tamanho);
+    let z = random(linhas * tamanho);
+    drones.push(new Drone(x, z));
+  }
 }
 
 function windowResized() {
@@ -81,6 +87,7 @@ function mousePressed() {
     requestPointerLock();
   }
   cam.desarmarTrapComMouse();
+  cam.regarPlantaComMouse();
 }
 
 // Desenhe o labirinto.
@@ -107,5 +114,9 @@ function draw() {
       let idx = index(i, j);
       grade[idx].mostrar(cam);
     }
+  }
+  for (let drone of drones) {
+    drone.atualizar();
+    drone.mostrar();
   }
 }
