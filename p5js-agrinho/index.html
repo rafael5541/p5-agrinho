@@ -78,11 +78,36 @@
     ">
       Aperte N para modo noclip.
     </span>
+    <span id="timer-hud" style="
+      background: rgba(0, 0, 0, 0.5);
+      padding: 6px 12px;
+      border-radius: 5px;
+    ">
+      Tempo restante: 05:00
+    </span>
   </div>
+  <div id="plantas-hud" style="
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+  font-size: 18px;
+  z-index: 1000;
+  user-select: none;
+">
+  Plantas: 0/0
+</div>
+
 
   <script src="src/labirinto.js"></script>
   <script src="src/camera.js"></script>
   <script src="src/menu.js"></script>
+  <script src="src/drone.js"></script>
   <script src="sketch.js"></script>
 </body>
 </html>
