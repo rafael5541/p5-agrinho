@@ -1,11 +1,9 @@
 let cam;
 let menu;
-let passo1, passo2, passo3;
-let sons = [];
 let background;
 let colunas, linhas;
 let fonte;
-let tamanho = 100;
+let tamanho;
 let grade = [];
 let atual;
 let pilha = [];
@@ -26,17 +24,16 @@ function keyPressed() {
 // Só carrega e inicia algumas variáveis essenciais.
 function setup() {
   background = loadImage("assets/dia.jpg");
-  passo1 = loadSound("assets/passo1.mp3");
-  passo2 = loadSound("assets/passo2.mp3");
-  passo3 = loadSound("assets/passo3.mp3");
+  preload();
   preloadLabirinto();
   createCanvas(windowWidth, windowHeight, WEBGL);
   pixelDensity(1);
   noSmooth();
   noLights();
   let sens = 0.002;
-  colunas = floor(width / tamanho);
-  linhas = floor(height / tamanho);
+  colunas = 10;
+  linhas = 15;
+  tamanho = min(windowWidth / colunas, windowHeight / linhas);
   cam = new Camera(
     tamanho / 2,
     tamanho / 6,
@@ -59,8 +56,7 @@ function setup() {
   adicionarTraps(50);
   detectarDeadEnds();
   atualizarHUDPlantas();
-  iniciarTimerRegressivo(3);
-  sonsPasso = [passo2, passo1, passo3];
+  iniciarTimerRegressivo(5);
   menu.aplicarConfiguracoes(cam);
   // Cria os drones.
   for (let i = 0; i < 60; i++) {
@@ -81,8 +77,9 @@ function mouseMoved() {
   }
 }
 
-// Trava o pointer do mouse, e desarma uma armadilha se tiver uma.
+// Trava o pointer do mouse, e desarma uma armadilha se tiver uma. Também inicia o áudio.
 function mousePressed() {
+  iniciarAudioContexto();
   if (!menu.ativo) {
     requestPointerLock();
   }
