@@ -4,26 +4,16 @@
 let imgMilho;
 let imgDrone;
 let imgArmadilha;
-let sonsDesarmar = [];
 
 function preloadLabirinto() {
   imgMilho = loadImage("assets/milho.png");
   imgArmadilha = loadImage("assets/armadilha.png");
   imgDrone = loadImage("assets/drone.png");
-  for (let i = 0; i < 10; i++) {
-    sonsDesarmar.push(loadSound("assets/desarmar.mp3"));
-  }
 }
 
-// Por alguma razão, o som buga depois de algum tempo. Ai eu só carrego várias vezes o mesmo som, e dou play.
-let somIndex = 0;
-
 function tocarSomDesarmar() {
-  if (sonsDesarmar.length > 0) {
-    let som = sonsDesarmar[somIndex % sonsDesarmar.length];
-    som.stop(); // Garante que não bugue
-    som.play();
-    somIndex++;
+  if (desarmarBuffer && audioCtx) {
+    tocarSom(desarmarBuffer);
   }
 }
 
@@ -254,7 +244,7 @@ function detectarDeadEnds() {
   for (let cel of grade) {
     if (cel.i === 0 && cel.j === 0) continue;
     let aberturas = cel.paredes.filter((p) => !p).length;
-    if (aberturas === 1) {
+    if (aberturas === 1 && !cel.temTrap) {
       cel.ePlanta = true;
     }
   }
