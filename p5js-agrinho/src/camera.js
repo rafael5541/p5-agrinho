@@ -61,7 +61,7 @@ class Camera {
       );
 
       // Colisão feita por mim, com assistência de vídeos do YouTube.
-      const buffer = 2;
+      const buffer = 3;
       let iTent = floor(
         (tentativa.x + buffer * Math.sign(direcaoFinal.x)) / this.tamanho
       );
@@ -103,12 +103,9 @@ class Camera {
       let jAtual = floor(this.pos.z / this.tamanho);
       this.marcarPasso(iAtual, jAtual);
       if (millis() - this.ultimoPasso > this.intervaloPasso) {
-        let som = sonsPasso[this.indicePasso];
-        if (!som.isPlaying()) {
-          som.play();
-          this.ultimoPasso = millis();
-          this.indicePasso = (this.indicePasso + 1) % sonsPasso.length;
-        }
+        tocarSom(passosBuffers[this.indicePasso]);
+        this.ultimoPasso = millis();
+        this.indicePasso = (this.indicePasso + 1) % passosBuffers.length;
       }
     }
     // código noclip, para testar.
