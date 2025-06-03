@@ -28,9 +28,14 @@ Você explora um labirinto, rega vegetais e tira armadilhas!
 - **Pixabay** - Pela maioria dos sons usados. (todos são royalty-free.)
 ### Créditos de imagens
 - Armadilha de urso: https://www.artstation.com/artwork/6bJ0g5
-- Drone: https://pxhere.com/nl/photo/1454487
+- Drone: https://pxhere.com/en/photo/1515979 (sem fundo, apontando para cima.)
 - Fundo para o level dia: https://www.flickr.com/photos/8525214@N06/6055469523/ (modificado com Photopea para deixar mais claro.)
 - Milho: https://baldis-basics-in-education-and-learning.fandom.com/wiki/Farm?file=Corn.png
+- Passos:
+  - passo1.mp3: https://pixabay.com/pt/sound-effects/st1-footstep-sfx-323053/
+  - passo2.mp3: https://pixabay.com/pt/sound-effects/st2-footstep-sfx-323055/
+  - passo3.mp3: https://pixabay.com/pt/sound-effects/st3-footstep-sfx-323056/
+- Som desarmar: https://pixabay.com/pt/sound-effects/mag-in-82094/
 
 ## Programas usados
 
