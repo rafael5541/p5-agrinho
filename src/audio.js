@@ -4,7 +4,10 @@ let volumeGlobal = 1.0;
 let audioCtx;
 let passosBuffers = [];
 let desarmarBuffer = null;
+let musicasBuffers = {};
 let gainNode;
+let audioIniciado = false;
+let carregamentoCompleto = false;
 
 async function iniciarAudioContexto() {
   if (!audioCtx) {
@@ -36,6 +39,15 @@ async function preload() {
   }
 
   desarmarBuffer = await carregarSom("assets/desarmar.mp3");
+  for (let level of levels) {
+    musicasBuffers[level.musica] = await carregarSom(level.musica);
+  }
+  carregamentoCompleto = true;
+
+  const loadingScreen = document.getElementById("tela-carregamento");
+  if (loadingScreen) {
+    loadingScreen.style.display = "none";
+  }
 }
 
 function tocarSom(buffer, loop = false) {
