@@ -1,6 +1,5 @@
 // Código para a câmera e movimento.
 // Inspirado por vários projetos do p5js, assistência do Stackoverflow.
-
 class Camera {
   constructor(
     x,
@@ -22,6 +21,10 @@ class Camera {
     this.intervaloPasso = 500;
     this.direcaoPasso;
     this.indicePasso = 0;
+    this.stamina = 100;
+    this.staminaMaximo = 100;
+    this.staminaRecuperacao = 5;
+    this.estaCorrendo = false;
   }
 
   atualizarMouse(mX, mY) {
@@ -39,9 +42,38 @@ class Camera {
     if (keyIsDown(65)) direcaoFinal.add(direita); // A
     if (keyIsDown(68)) direcaoFinal.sub(direita); // D
 
+    // Recupera a stamina, se não estiver correndo.
+    if (!this.estaCorrendo) {
+      this.stamina += this.staminaRecuperacao * (deltaTime / 1000);
+      if (this.stamina > this.staminaMaximo) this.stamina = this.staminaMaximo;
+    }
+
+    let barra = document.getElementById("barra-stamina-fill");
+    if (barra) {
+      barra.style.width = (this.stamina / this.staminaMaximo) * 100 + "%";
+    }
+
     if (direcaoFinal.mag() > 0) {
       direcaoFinal.normalize();
-      let fatorVelocidade = 1;
+
+      // Código para correr. Bem simples, mais ajuda!
+      if (keyIsDown(SHIFT) && this.stamina > 0) {
+        this.estaCorrendo = true;
+        this.stamina -= 20 * (deltaTime / 1000);
+        if (this.stamina <= 0) {
+          this.stamina = 0;
+          this.estaCorrendo = false;
+        }
+      } else {
+        this.estaCorrendo = false;
+      }
+
+      let fatorVelocidade = this.estaCorrendo ? 1.5 : 1;
+
+      let barra = document.getElementById("barra-stamina-fill");
+      if (barra) {
+        barra.style.width = (this.stamina / this.staminaMaximo) * 100 + "%";
+      }
 
       let i = floor(this.pos.x / this.tamanho);
       let j = floor(this.pos.z / this.tamanho);
@@ -102,6 +134,7 @@ class Camera {
       let iAtual = floor(this.pos.x / this.tamanho);
       let jAtual = floor(this.pos.z / this.tamanho);
       this.marcarPasso(iAtual, jAtual);
+      checarIrrigadorNaPosicao(iAtual, jAtual);
       if (millis() - this.ultimoPasso > this.intervaloPasso) {
         tocarSom(passosBuffers[this.indicePasso]);
         this.ultimoPasso = millis();
@@ -165,6 +198,12 @@ class Camera {
     let iAtual = floor(this.pos.x / this.tamanho);
     let jAtual = floor(this.pos.z / this.tamanho);
     let celulaAtual = grade[index(iAtual, jAtual)];
-    if (celulaAtual) celulaAtual.regarPlanta();
+    if (celulaAtual && celulaAtual.regarPlanta()) {
+      this.stamina = this.staminaMaximo;
+      let barra = document.getElementById("barra-stamina-fill");
+      if (barra) {
+        barra.style.width = "100%";
+      }
+    }
   }
 }
