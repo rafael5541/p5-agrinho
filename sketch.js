@@ -1,68 +1,80 @@
-let cam;
-let menu;
-let background;
-let colunas, linhas;
-let fonte;
-let tamanho;
+let cam, menu, background;
+let colunas, linhas, tamanho;
 let grade = [];
-let atual;
-let pilha = [];
-let passos = new Set();
-let noclip = false;
 let drones = [];
+let regadores = [];
+let jogoIniciado = false;
+let nivelAtual = 0;
+let musica;
+let noclip = false;
 
 function keyPressed() {
-  if (key === "p" || key === "P") {
-    menu.alternar();
-  }
-  if (key === "n" || key === "N") {
+  if (key.toLowerCase() === "p") menu.alternar();
+  if (key.toLowerCase() === "n") {
     noclip = !noclip;
     console.log("Modo noclip:", noclip ? "ATIVADO" : "DESATIVADO");
   }
 }
 
-// Só carrega e inicia algumas variáveis essenciais.
-function setup() {
-  background = loadImage("assets/dia.jpg");
-  preload();
+async function setup() {
+  noCanvas();
+  await preload();
   preloadLabirinto();
+  document
+    .getElementById("botao-iniciar")
+    .addEventListener("click", mostrarSelecaoDeNiveis);
+}
+
+function iniciarJogo() {
+  jogoIniciado = true;
+  document.getElementById("tela-inicial").style.display = "none";
+  document.getElementById("tela-carregamento").style.display = "none";
+
   createCanvas(windowWidth, windowHeight, WEBGL);
   pixelDensity(1);
   noSmooth();
   noLights();
-  let sens = 0.002;
+
   colunas = 10;
   linhas = 15;
   tamanho = min(windowWidth / colunas, windowHeight / linhas);
+
+  // Inicializa câmera e menu.
   cam = new Camera(
     tamanho / 2,
     tamanho / 6,
     tamanho / 5,
-    sens,
+    0.002,
     tamanho,
     marcarPasso
   );
   menu = new Menu();
 
-  // Cria nossa "grade" (um labirinto é basicamente uma grade.)
+  // Cria células do labirinto. o labirinto é tipo uma "grade".
+  grade = [];
   for (let j = 0; j < linhas; j++) {
     for (let i = 0; i < colunas; i++) {
-      const cel = new Celula(i, j);
-      grade.push(cel);
+      grade.push(new Celula(i, j));
     }
   }
+
   atual = grade[0];
   gerarLabirinto();
-  adicionarTraps(50);
-  detectarDeadEnds();
+
+  const level = levels[nivelAtual];
+  background = loadImage(level.background, () => loop());
+  musica = musicasBuffers[level.musica];
+
+  // Prepara armadilhas e plantas. São definidas no levels.js.
+  level.armadilhas();
+  adicionarPlantas();
   atualizarHUDPlantas();
   iniciarTimerRegressivo(5);
   menu.aplicarConfiguracoes(cam);
-  // Cria os drones.
+
+  drones = [];
   for (let i = 0; i < 60; i++) {
-    let x = random(colunas * tamanho);
-    let z = random(linhas * tamanho);
-    drones.push(new Drone(x, z));
+    drones.push(new Drone(random(colunas * tamanho), random(linhas * tamanho)));
   }
 }
 
@@ -70,50 +82,63 @@ function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 }
 
-// Para os movimentos da câmera com o mouse.
 function mouseMoved() {
   if (document.pointerLockElement === canvas) {
     cam.atualizarMouse(movedX, movedY);
   }
 }
 
-// Trava o pointer do mouse, e desarma uma armadilha se tiver uma. Também inicia o áudio.
 function mousePressed() {
-  iniciarAudioContexto();
-  if (!menu.ativo) {
+  if (!carregamentoCompleto) {
+    console.log("Aguarde o carregamento da música...");
+    return;
+  }
+
+  if (jogoIniciado && !audioIniciado) {
+    tocarSom(musica, true);
+    audioIniciado = true;
+  }
+
+  if (menu && !menu.ativo) {
     requestPointerLock();
   }
-  cam.desarmarTrapComMouse();
-  cam.regarPlantaComMouse();
+
+  if (jogoIniciado) {
+    cam.desarmarTrapComMouse();
+    cam.regarPlantaComMouse();
+  }
 }
 
-// Desenhe o labirinto.
 function draw() {
+  if (!jogoIniciado) return;
+
   panorama(background);
   cam.mover();
   cam.aplicar();
 
-  // bem útil, porque ai o jogo não vai rodar a 3 fps em labirintos grandes.
-  // só restringe a câmera por um campo de visão.
-  let raioVisao = 5;
-  let margem = 1;
-  let cx = floor(cam.pos.x / tamanho);
-  let cz = floor(cam.pos.z / tamanho);
+  const cx = floor(cam.pos.x / tamanho);
+  const cz = floor(cam.pos.z / tamanho);
 
-  let minI = max(0, cx - raioVisao - margem);
-  let maxI = min(colunas - 1, cx + raioVisao + margem);
-  let minJ = max(0, cz - raioVisao - margem);
-  let maxJ = min(linhas - 1, cz + raioVisao + margem);
+  const raioVisao = 5;
+  const margem = 1;
 
-  // aí que a gente desenha o labirinto, finalmente.
+  const minI = max(0, cx - raioVisao - margem);
+  const maxI = min(colunas - 1, cx + raioVisao + margem);
+  const minJ = max(0, cz - raioVisao - margem);
+  const maxJ = min(linhas - 1, cz + raioVisao + margem);
+
   for (let j = minJ; j <= maxJ; j++) {
     for (let i = minI; i <= maxI; i++) {
-      let idx = index(i, j);
-      grade[idx].mostrar(cam);
+      grade[index(i, j)].mostrar(cam);
     }
   }
-  for (let drone of drones) {
+
+  for (const drone of drones) {
     drone.atualizar();
     drone.mostrar();
+  }
+  if (bloqueioVisivel && millis() - ultimoTempoEmRegador > 10000) {
+    esconderBloqueio();
+    bloqueioVisivel = false;
   }
 }
