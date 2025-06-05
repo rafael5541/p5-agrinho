@@ -1,3 +1,5 @@
+// Faz os drones. Por enquanto, é so decoração. talvez eu faça esses drones fazer alguma coisa em um level.
+
 class Drone {
   constructor(x, z) {
     this.x = x;
