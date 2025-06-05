@@ -14,8 +14,10 @@ Você explora um labirinto, rega vegetais e tira armadilhas!
   - **A**: andar para a esquerda
   - **S**: andar para trás
   - **D**: andar para a direita
+- Use **Shift** para correr! Você não tem stamina infinita.
 - Fique de olho no chão! Olhe para baixo para ver armadilhas.
 - Clique nas armadilhas para desarmá-las.
+- Cuidado com os irrigadores também! Espere eles pararem de jogar água, para sua tela não ser bloqueada!
 - Encontre os vegetais no labirinto e clique neles para regá-los!
 
 ## Créditos
@@ -36,6 +38,7 @@ Você explora um labirinto, rega vegetais e tira armadilhas!
   - passo2.mp3: https://pixabay.com/pt/sound-effects/st2-footstep-sfx-323055/
   - passo3.mp3: https://pixabay.com/pt/sound-effects/st3-footstep-sfx-323056/
 - Som desarmar: https://pixabay.com/pt/sound-effects/mag-in-82094/
+- Musica dia: feito pelo meu irmão, link bandlab: <COLOQUE LINK BANDLAB AQUI>
 
 ## Programas usados
 
