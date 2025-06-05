@@ -1,113 +1,330 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Milhópolis</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="libraries/p5.min.js"></script>
-</head>
-<body>
-  <div id="menu-container" style="
-      position: fixed;
-      top: 50px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.85);
-      color: white;
-      padding: 20px 30px;
-      border-radius: 10px;
-      font-family: Arial, sans-serif;
-      width: 300px;
-      display: none;
-      z-index: 1000;
-      user-select: none;
-    ">
-    <h2 style="text-align:center; margin: 0 0 15px 0;">Configurações</h2>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Milhópolis</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="libraries/p5.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Comic+Neue&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div
+      id="menu-container"
+      style="
+        position: fixed;
+        top: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.85);
+        color: white;
+        padding: 20px 30px;
+        border-radius: 10px;
+        font-family: Arial, sans-serif;
+        width: 300px;
+        display: none;
+        z-index: 1000;
+        user-select: none;
+      "
+    >
+      <h2 style="text-align: center; margin: 0 0 15px 0">Configurações</h2>
 
-    <label for="fov-slider" style="font-size: 18px; display: block; margin-bottom: 10px;">
-      FOV: <span id="fov-value">120°</span>
-    </label>
-    <input type="range" id="fov-slider" min="30" max="140" value="120" style="width: 100%;" />
-    <label for="volume-slider" style="font-size: 18px; display: block; margin-bottom: 10px;">
-      Volume: <span id="volume-value">100</span>
-    </label>
-    <input type="range" id="volume-slider" min="0" max="100" value="100" style="width: 100%;" />
-    <label for="sens-slider" style="font-size: 18px; display: block; margin-bottom: 10px;">
-      Sensibilidade: <span id="sens-value">0.002</span>
-    </label>
-    <input type="range" id="sens-slider" min="0.001" max="0.01" step="0.0001" value="0.002" style="width: 100%;" />
+      <label
+        for="fov-slider"
+        style="font-size: 18px; display: block; margin-bottom: 10px"
+      >
+        FOV: <span id="fov-value">120°</span>
+      </label>
+      <input
+        type="range"
+        id="fov-slider"
+        min="30"
+        max="140"
+        value="120"
+        style="width: 100%"
+      />
+      <label
+        for="volume-slider"
+        style="font-size: 18px; display: block; margin-bottom: 10px"
+      >
+        Volume: <span id="volume-value">100</span>
+      </label>
+      <input
+        type="range"
+        id="volume-slider"
+        min="0"
+        max="100"
+        value="100"
+        style="width: 100%"
+      />
+      <label
+        for="sens-slider"
+        style="font-size: 18px; display: block; margin-bottom: 10px"
+      >
+        Sensibilidade: <span id="sens-value">0.002</span>
+      </label>
+      <input
+        type="range"
+        id="sens-slider"
+        min="0.001"
+        max="0.01"
+        step="0.0001"
+        value="0.002"
+        style="width: 100%"
+      />
 
-    <button id="close-menu-btn" style="
-      margin-top: 15px;
-      background: #444;
-      color: white;
-      padding: 8px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      width: 100%;
-    ">Fechar</button>
-  </div>
+      <button
+        id="close-menu-btn"
+        style="
+          margin-top: 15px;
+          background: #444;
+          color: white;
+          padding: 8px 20px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          width: 100%;
+        "
+      >
+        Fechar
+      </button>
+    </div>
 
-  <div id="hud-container" style="
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    display: flex;
-    justify-content: space-between;
-    user-select: none;
-    z-index: 10000;
-    font-family: Arial, sans-serif;
-    font-size: 18px;
-    color: white;
-  ">
-    <span style="
-      background: rgba(0, 0, 0, 0.5);
-      padding: 6px 12px;
-      border-radius: 5px;
-    ">
-      Aperte P para opções.
-    </span>
-    <span style="
-      background: rgba(0, 0, 0, 0.5);
-      padding: 6px 12px;
-      border-radius: 5px;
-    ">
-      Aperte N para modo noclip.
-    </span>
-    <span id="timer-hud" style="
-      background: rgba(0, 0, 0, 0.5);
-      padding: 6px 12px;
-      border-radius: 5px;
-    ">
-      Tempo restante: 05:00
-    </span>
-  </div>
-  <div id="plantas-hud" style="
-  position: fixed;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-family: Arial, sans-serif;
-  font-size: 18px;
-  z-index: 1000;
-  user-select: none;
-">
-  Plantas: 0/0
-</div>
+    <div
+      id="hud-container"
+      style="
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        display: flex;
+        justify-content: space-between;
+        user-select: none;
+        z-index: 10000;
+        font-family: Arial, sans-serif;
+        font-size: 18px;
+        color: white;
+      "
+    >
+      <span
+        style="
+          background: rgba(0, 0, 0, 0.5);
+          padding: 6px 12px;
+          border-radius: 5px;
+        "
+      >
+        Aperte P para opções.
+      </span>
+      <span
+        style="
+          background: rgba(0, 0, 0, 0.5);
+          padding: 6px 12px;
+          border-radius: 5px;
+        "
+      >
+        Aperte N para modo noclip.
+      </span>
+      <span
+        id="timer-hud"
+        style="
+          background: rgba(0, 0, 0, 0.5);
+          padding: 6px 12px;
+          border-radius: 5px;
+        "
+      >
+        Tempo restante: 05:00
+      </span>
+      <div
+        id="barra-stamina"
+        style="
+          position: absolute;
+          margin-top: 60px;
+          width: 200px;
+          height: 20px;
+          background: rgba(255, 255, 255, 0.2);
+          border: 2px solid white;
+          border-radius: 10px;
+          overflow: hidden;
+        "
+      >
+        <div
+          id="barra-stamina-fill"
+          style="
+            width: 100%;
+            height: 100%;
+            background: limegreen;
+            transition: width 0.2s ease;
+          "
+        ></div>
+      </div>
+    </div>
+    <div
+      id="plantas-hud"
+      style="
+        position: fixed;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-family: Arial, sans-serif;
+        font-size: 18px;
+        z-index: 1000;
+        user-select: none;
+      "
+    >
+      Plantas: 0/0
+    </div>
 
+    <div
+      id="tela-carregamento"
+      style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: black;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Comic Neue', cursive, sans-serif;
+        font-size: 56px;
+        color: white;
+        z-index: 20000;
+        user-select: none;
+      "
+    >
+      <span style="margin-right: 15px">Carregando...</span>
+      <span
+        style="
+          display: inline-block;
+          animation: spin 1.5s linear infinite;
+          font-size: 32px;
+        "
+      >
+        🌽
+      </span>
+    </div>
+    <div
+      id="tela-selecao-nivel"
+      style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: #111;
+        color: white;
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Comic Neue', cursive;
+        z-index: 16000;
+        user-select: none;
+      "
+    >
+      <h2 style="font-size: 48px; margin-bottom: 30px">Escolha um Nível</h2>
+      <div
+        id="botoes-niveis"
+        style="display: flex; gap: 30px; flex-wrap: wrap"
+      ></div>
+      <div
+        id="info-nivel"
+        style="
+          margin-top: 40px;
+          background: rgba(255, 255, 255, 0.1);
+          padding: 20px;
+          border-radius: 12px;
+          max-width: 500px;
+          text-align: center;
+          font-size: 20px;
+          min-height: 100px;
+        "
+      >
+        Passe o mouse sobre um nível para ver detalhes.
+      </div>
+    </div>
 
-  <script src="src/audio.js"></script>
-  <script src="src/labirinto.js"></script>
-  <script src="src/camera.js"></script>
-  <script src="src/menu.js"></script>
-  <script src="src/drone.js"></script>
-  <script src="sketch.js"></script>
-</body>
+    <style>
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+    <div
+      id="tela-inicial"
+      style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: linear-gradient(to bottom right, #2e7d32, #66bb6a);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Comic Neue', cursive, sans-serif;
+        z-index: 15000;
+        color: white;
+        user-select: none;
+      "
+    >
+      <h1 style="font-size: 64px; margin-bottom: 40px">🌽 Milhópolis 🌽</h1>
+
+      <button
+        id="botao-iniciar"
+        style="
+          font-size: 24px;
+          padding: 15px 40px;
+          border: none;
+          border-radius: 10px;
+          background-color: #1b5e20;
+          color: white;
+          cursor: pointer;
+          transition: background 0.3s;
+        "
+        onmouseover="this.style.backgroundColor='#388e3c'"
+        onmouseout="this.style.backgroundColor='#1b5e20'"
+      >
+        Iniciar
+      </button>
+    </div>
+    <div
+      id="bloqueio-visao"
+      style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 255, 0.4) url('assets/agua.png') center/contain
+          no-repeat;
+        z-index: 9999;
+        pointer-events: none;
+        opacity: 0;
+        display: none;
+        transition: opacity 0.5s ease;
+      "
+    ></div>
+
+    <script src="src/audio.js"></script>
+    <script src="src/levels.js"></script>
+    <script src="src/labirinto.js"></script>
+    <script src="src/camera.js"></script>
+    <script src="src/menu.js"></script>
+    <script src="src/drone.js"></script>
+    <script src="sketch.js"></script>
+  </body>
 </html>
