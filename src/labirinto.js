@@ -333,8 +333,11 @@ function marcarPasso(i, j) {
 function adicionarPlantas() {
   for (let cel of grade) {
     if (cel.i === 0 && cel.j === 0) continue;
+
     let aberturas = cel.paredes.filter((p) => !p).length;
-    if (aberturas === 1 && !cel.temTrap) {
+    let temRegador = regadores.some((r) => r.i === cel.i && r.j === cel.j);
+
+    if (aberturas === 1 && !cel.temTrap && !temRegador) {
       cel.ePlanta = true;
     }
   }
