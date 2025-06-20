@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Milhópolis</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <script src="libraries/p5.min.js"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Comic+Neue&display=swap"
@@ -97,16 +101,19 @@
       id="hud-container"
       style="
         position: fixed;
-        top: 10px;
-        left: 10px;
-        right: 10px;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
         display: flex;
-        justify-content: space-between;
+        gap: 15px;
         user-select: none;
         z-index: 10000;
         font-family: Arial, sans-serif;
         font-size: 18px;
         color: white;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 6px 12px;
+        border-radius: 5px;
       "
     >
       <span
@@ -119,15 +126,6 @@
         Aperte P para opções.
       </span>
       <span
-        style="
-          background: rgba(0, 0, 0, 0.5);
-          padding: 6px 12px;
-          border-radius: 5px;
-        "
-      >
-        Aperte N para modo noclip.
-      </span>
-      <span
         id="timer-hud"
         style="
           background: rgba(0, 0, 0, 0.5);
@@ -137,49 +135,95 @@
       >
         Tempo restante: 05:00
       </span>
-      <div
-        id="barra-stamina"
-        style="
-          position: absolute;
-          margin-top: 60px;
-          width: 200px;
-          height: 20px;
-          background: rgba(255, 255, 255, 0.2);
-          border: 2px solid white;
-          border-radius: 10px;
-          overflow: hidden;
-        "
-      >
-        <div
-          id="barra-stamina-fill"
-          style="
-            width: 100%;
-            height: 100%;
-            background: limegreen;
-            transition: width 0.2s ease;
-          "
-        ></div>
-      </div>
+    </div>
+    <div id="plantas-hud">Plantas: 0/0</div>
+    <div id="inverter-hud" style="display: none">
+      Seus controles estão invertidos por
+      <span id="contador-inversao">6</span> segundos!
     </div>
     <div
-      id="plantas-hud"
+      id="barra-stamina"
       style="
         position: fixed;
         bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(0, 0, 0, 0.7);
-        color: white;
-        padding: 10px 20px;
-        border-radius: 8px;
-        font-family: Arial, sans-serif;
-        font-size: 18px;
-        z-index: 1000;
-        user-select: none;
+        left: 10px;
+        width: 300px;
+        height: 30px;
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid white;
+        border-radius: 10px;
+        overflow: hidden;
+        z-index: 10001;
       "
     >
-      Plantas: 0/0
+      <div
+        id="barra-stamina-fill"
+        style="
+          width: 100%;
+          height: 100%;
+          background: limegreen;
+          transition: width 0.2s ease;
+        "
+      ></div>
     </div>
+    <style>
+      #hud-container {
+        font-family: "Comic Neue", cursive, sans-serif;
+        font-size: 18px;
+        color: white;
+        filter: contrast(200%) saturate(150%);
+        image-rendering: pixelated;
+        -webkit-font-smoothing: none;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: geometricPrecision;
+      }
+
+      #plantas-hud > span {
+        background: transparent !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+      }
+
+      #plantas-hud {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        transform: none;
+        background: transparent !important;
+        color: #000;
+        font-family: "Comic Neue", cursive, sans-serif;
+        font-size: 40px;
+        user-select: none;
+        font-weight: 900;
+        z-index: 10001;
+        padding: 0;
+        filter: contrast(600%) saturate(400%);
+        image-rendering: pixelated;
+        -webkit-font-smoothing: none;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: geometricPrecision;
+        margin-bottom: 15px;
+      }
+      #inverter-hud {
+        position: fixed;
+        top: 40px;
+        left: 10px;
+        transform: none;
+        background: transparent !important;
+        color: #000;
+        font-family: "Comic Neue", cursive, sans-serif;
+        font-size: 40px;
+        user-select: none;
+        font-weight: 900;
+        z-index: 10001;
+        padding: 0;
+        filter: contrast(600%) saturate(400%);
+        image-rendering: pixelated;
+        -webkit-font-smoothing: none;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: geometricPrecision;
+      }
+    </style>
 
     <div
       id="tela-carregamento"
@@ -252,6 +296,121 @@
       </div>
     </div>
 
+    <div
+      id="tela-vitoria"
+      style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: linear-gradient(135deg, #4caf50 70%, #81c784 100%);
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Comic Neue', cursive, sans-serif;
+        z-index: 30000;
+        color: white;
+        user-select: none;
+        text-align: center;
+        animation: fadeIn 1s;
+      "
+    >
+      <h1
+        style="
+          font-size: 48px;
+          margin-bottom: 20px;
+          text-shadow: 0 0 10px #fff, 0 0 20px #4caf50;
+        "
+      >
+        🏆 Parabéns!
+      </h1>
+      <p style="font-size: 24px; margin-bottom: 30px">Você venceu!</p>
+      <p id="curiosidade" style="font-style: italic; margin-top: 10px"></p>
+      <button
+        id="botao-voltar-menu"
+        onclick="voltarMenuInicial()"
+        style="
+          font-size: 20px;
+          padding: 10px 30px;
+          border-radius: 8px;
+          background: #1b5e20;
+          color: white;
+          border: none;
+          cursor: pointer;
+          transition: 0.2s;
+        "
+        onmouseover="this.style.background='#388e3c'; this.style.transform='scale(1.05)';"
+        onmouseout="this.style.background='#1b5e20'; this.style.transform='scale(1)';"
+      >
+        Voltar ao Menu
+      </button>
+    </div>
+    <div
+      id="tela-perdeu"
+      style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: linear-gradient(135deg, #ec7c74 70%, #81c784 100%);
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Comic Neue', cursive, sans-serif;
+        z-index: 30000;
+        color: white;
+        user-select: none;
+        text-align: center;
+        animation: fadeIn 1s;
+      "
+    >
+      <h1
+        style="
+          font-size: 48px;
+          margin-bottom: 20px;
+          text-shadow: 0 0 10px #fff, 0 0 20px #afa04c;
+        "
+      >
+        Não foi dessa vez...
+      </h1>
+      <p style="font-size: 24px; margin-bottom: 30px">
+        Você perdeu. Não se preocupe, você consegue!
+      </p>
+      <p id="dica-perdeu" style="font-style: italic; margin-top: 10px"></p>
+      <button
+        id="botao-voltar-menu-perdeu"
+        onclick="voltarMenuInicial()"
+        style="
+          font-size: 20px;
+          padding: 10px 30px;
+          border-radius: 8px;
+          background: #5e1b1b;
+          color: white;
+          border: none;
+          cursor: pointer;
+          transition: 0.2s;
+        "
+        onmouseover="this.style.background='#388e3c'; this.style.transform='scale(1.05)';"
+        onmouseout="this.style.background='#1b5e20'; this.style.transform='scale(1)';"
+      >
+        Voltar ao Menu
+      </button>
+    </div>
+    <style>
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+    </style>
+
     <style>
       @keyframes spin {
         from {
@@ -262,6 +421,7 @@
         }
       }
     </style>
+
     <div
       id="tela-inicial"
       style="
@@ -300,6 +460,42 @@
       >
         Iniciar
       </button>
+      <button
+        id="botao-como-jogar"
+        style="
+          font-size: 20px;
+          padding: 12px 30px;
+          margin-top: 20px;
+          border: none;
+          border-radius: 10px;
+          background-color: #388e3c;
+          color: white;
+          cursor: pointer;
+          transition: background 0.3s;
+        "
+        onmouseover="this.style.backgroundColor='#4caf50'"
+        onmouseout="this.style.backgroundColor='#388e3c'"
+      >
+        Como jogar/História
+      </button>
+      <button
+        id="botao-conquistas"
+        style="
+          font-size: 20px;
+          padding: 12px 30px;
+          margin-top: 20px;
+          border: none;
+          border-radius: 10px;
+          background-color: #388e3c;
+          color: white;
+          cursor: pointer;
+          transition: background 0.3s;
+        "
+        onmouseover="this.style.backgroundColor='#4caf50'"
+        onmouseout="this.style.backgroundColor='#388e3c'"
+      >
+        Ver conquistas
+      </button>
     </div>
     <div
       id="bloqueio-visao"
@@ -309,7 +505,7 @@
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: rgba(0, 0, 255, 0.4) url('assets/agua.png') center/contain
+        background: rgba(0, 0, 255, 0.4) url('assets/agua.png') center/cover
           no-repeat;
         z-index: 9999;
         pointer-events: none;
@@ -319,12 +515,196 @@
       "
     ></div>
 
+    <div
+      id="modal-como-jogar"
+      style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.85);
+        color: white;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        font-family: 'Comic Neue', cursive, sans-serif;
+        z-index: 25000;
+        user-select: none;
+      "
+    >
+      <div
+        style="
+          max-width: 600px;
+          background: #2e7d32;
+          padding: 25px 30px;
+          border-radius: 15px;
+          box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+          text-align: left;
+          position: relative;
+          animation: slideIn 0.4s ease-out;
+        "
+      >
+        <h2 style="margin-top: 0; text-align: center">Como Jogar</h2>
+        <p>
+          Bem-vindo(a) a Milhópolis!<br /><br />
+          Seu objetivo é achar e regar todas as plantas no mapa.<br />
+          Para regar uma planta, clique sobre ela.<br />
+          Mais cuidado, tem várias armadilhas! As armadilhas vão ser explicadas
+          dentro do level. Quando todas as plantas estiverem regadas, siga as
+          setas, e clique no trator para vencer o jogo!<br /><br />
+          Controles:<br />
+          - Use WASD para andar.<br />
+          - Use o mouse para olhar em volta.<br />
+          - Use o Shift para correr.<br />
+          - Clique para regar plantas.<br />
+          - Pressione <strong>P</strong> para abrir o menu de opções.<br />
+          Boa sorte e divirta-se!
+        </p>
+        <h2 style="margin-top: 20px; text-align: center">História</h2>
+        <p>
+          Antes, a cidade e o campo eram separados e cada um cuidava do seu
+          lugar.<br />
+          Mas agora as coisas mudaram: cidade e campo vão trabalhar juntos para
+          ajudar na agricultura!<br />
+          Drones ajudam a cuidar das plantações, irrigadores modernos mantêm as
+          plantas molhadas,<br />
+          e pessoas dedicadas protegem as plantações dos perigos.<br />
+          Você foi escolhido para essa missão: cuidar e fazer crescer esse novo
+          mundo unido.<br />
+          Prepare-se para aprender, explorar e comemorar essa união!
+        </p>
+
+        <button
+          id="fechar-modal-como-jogar"
+          style="
+            display: block;
+            margin: 20px auto 0 auto;
+            padding: 10px 30px;
+            background: #1b5e20;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            color: white;
+            transition: all 0.3s ease;
+          "
+          onmouseover="this.style.backgroundColor='#388e3c'"
+          onmouseout="this.style.backgroundColor='#1b5e20'"
+        >
+          Fechar
+        </button>
+      </div>
+    </div>
+    <div id="modal-conquistas">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Conquistas</h2>
+        </div>
+        <ul id="lista-conquistas"></ul>
+        <button
+          id="fechar-modal-conquistas"
+          onmouseover="this.style.backgroundColor='#388e3c'"
+          onmouseout="this.style.backgroundColor='#1b5e20'"
+        >
+          Fechar
+        </button>
+      </div>
+    </div>
+    <div
+      id="dialog-box"
+      style="
+        display: none;
+        position: fixed;
+        bottom: 10%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80%;
+        max-width: 600px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        font-family: 'Arial', sans-serif;
+        font-size: 18px;
+        box-shadow: 0 0 10px black;
+        z-index: 9999;
+      "
+    >
+      <div id="dialog-text" style="min-height: 60px"></div>
+      <div style="margin-top: 15px; text-align: right">
+        <button
+          id="dialog-next"
+          style="
+            background: #3a7;
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+          "
+        >
+          Próximo
+        </button>
+        <button
+          id="dialog-close"
+          style="
+            background: #a33;
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+          "
+        >
+          Fechar
+        </button>
+        <div
+          id="digito-seletor"
+          style="display: none; margin-top: 10px; text-align: center"
+        >
+          <div style="display: inline-block; margin: 0 10px">
+            <button onclick="alterarDigito(0, -1)">⬆️</button>
+            <div id="digito0" style="font-size: 32px">0</div>
+            <button onclick="alterarDigito(0, 1)">⬇️</button>
+          </div>
+          <div style="display: inline-block; margin: 0 10px">
+            <button onclick="alterarDigito(1, -1)">⬆️</button>
+            <div id="digito1" style="font-size: 32px">0</div>
+            <button onclick="alterarDigito(1, 1)">⬇️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+
+    <script>
+      // easteregg
+      const digitos = [0, 0];
+      function alterarDigito(index, delta) {
+        digitos[index] = (digitos[index] + delta + 10) % 10;
+        document.getElementById(`digito${index}`).textContent = digitos[index];
+        checarCodigo();
+      }
+
+      function checarCodigo() {
+        if (digitos[0] === 3 && digitos[1] === 4) {
+          npcs[0].fecharDialogo();
+          window.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "_blank");
+          conquistas["segredo"].desbloquear();
+        }
+      }
+    </script>
     <script src="src/audio.js"></script>
     <script src="src/levels.js"></script>
     <script src="src/labirinto.js"></script>
     <script src="src/camera.js"></script>
     <script src="src/menu.js"></script>
     <script src="src/drone.js"></script>
+    <script src="src/npc.js"></script>
+    <script src="src/conquista.js"></script>
     <script src="sketch.js"></script>
   </body>
 </html>
