@@ -1,5 +1,20 @@
 // Código para a câmera e movimento.
 // Inspirado por vários projetos do p5js, assistência do Stackoverflow.
+
+// Para object pooling. É uma técnica de otimização.
+const objectPool = {
+  _pool: [],
+  get(x = 0, y = 0, z = 0) {
+    let v = this._pool.pop() || new p5.Vector();
+    v.set(x, y, z);
+    return v;
+  },
+  release(v) {
+    this._pool.push(v);
+  },
+};
+
+// Classe para câmera.
 class Camera {
   constructor(
     x,
@@ -16,6 +31,7 @@ class Camera {
     this.velocidadeBase = 0.07;
     this.tamanho = tamanhoCelula;
     this.fov = radians(120);
+    this.fovAtual = this.fov;
     this.marcarPasso = marcarPassoFn;
     this.ultimoPasso = 0;
     this.intervaloPasso = 500;
@@ -23,40 +39,52 @@ class Camera {
     this.indicePasso = 0;
     this.stamina = 100;
     this.staminaMaximo = 100;
-    this.staminaRecuperacao = 5;
+    this.staminaRecuperacao = 7;
     this.estaCorrendo = false;
+    this.barraStamina = document.getElementById("barra-stamina-fill");
   }
 
+  // Atualiza a rotação da câmera com base no movimento do mouse
   atualizarMouse(mX, mY) {
     this.yaw -= mX * this.sens;
     this.pitch += mY * this.sens;
     this.pitch = constrain(this.pitch, -HALF_PI + 0.01, HALF_PI - 0.01);
   }
+
+  // Código para mover. Sim, o player é so uma câmera flutuante.
   mover() {
-    let frente = createVector(sin(this.yaw), 0, cos(this.yaw));
-    let direita = createVector(cos(this.yaw), 0, -sin(this.yaw));
-    let direcaoFinal = createVector();
+    if (dialogoAtivo) return;
+    if (menuAtivo) return;
+    let frente = objectPool.get(sin(this.yaw), 0, cos(this.yaw));
+    let direita = objectPool.get(cos(this.yaw), 0, -sin(this.yaw));
+    let direcaoFinal = objectPool.get();
 
-    if (keyIsDown(87)) direcaoFinal.add(frente); // W
-    if (keyIsDown(83)) direcaoFinal.sub(frente); // S
-    if (keyIsDown(65)) direcaoFinal.add(direita); // A
-    if (keyIsDown(68)) direcaoFinal.sub(direita); // D
+    if (inverterControles) {
+      if (keyIsDown(87)) direcaoFinal.sub(frente); // W
+      if (keyIsDown(83)) direcaoFinal.add(frente); // S
+      if (keyIsDown(65)) direcaoFinal.sub(direita); // A
+      if (keyIsDown(68)) direcaoFinal.add(direita); // D
+    } else {
+      if (keyIsDown(87)) direcaoFinal.add(frente); // W
+      if (keyIsDown(83)) direcaoFinal.sub(frente); // S
+      if (keyIsDown(65)) direcaoFinal.add(direita); // A
+      if (keyIsDown(68)) direcaoFinal.sub(direita); // D
+    }
 
-    // Recupera a stamina, se não estiver correndo.
+    // Recuperação de stamina
     if (!this.estaCorrendo) {
       this.stamina += this.staminaRecuperacao * (deltaTime / 1000);
       if (this.stamina > this.staminaMaximo) this.stamina = this.staminaMaximo;
     }
 
-    let barra = document.getElementById("barra-stamina-fill");
-    if (barra) {
-      barra.style.width = (this.stamina / this.staminaMaximo) * 100 + "%";
+    if (this.barraStamina) {
+      this.barraStamina.style.width =
+        (this.stamina / this.staminaMaximo) * 100 + "%";
     }
 
     if (direcaoFinal.mag() > 0) {
       direcaoFinal.normalize();
 
-      // Código para correr. Bem simples, mais ajuda!
       if (keyIsDown(SHIFT) && this.stamina > 0) {
         this.estaCorrendo = true;
         this.stamina -= 20 * (deltaTime / 1000);
@@ -70,30 +98,31 @@ class Camera {
 
       let fatorVelocidade = this.estaCorrendo ? 1.5 : 1;
 
-      let barra = document.getElementById("barra-stamina-fill");
-      if (barra) {
-        barra.style.width = (this.stamina / this.staminaMaximo) * 100 + "%";
+      if (this.barraStamina) {
+        this.barraStamina.style.width =
+          (this.stamina / this.staminaMaximo) * 100 + "%";
       }
 
-      let i = floor(this.pos.x / this.tamanho);
-      let j = floor(this.pos.z / this.tamanho);
+      let i = (this.pos.x / this.tamanho) | 0;
+      let j = (this.pos.z / this.tamanho) | 0;
       let celulaAtual = grade[index(i, j)];
 
       if (celulaAtual && celulaAtual.temTrap && !celulaAtual.trapDesarmada) {
         fatorVelocidade = 0.15;
         this.intervaloPasso = 800;
+      } else if (this.estaCorrendo) {
+        this.intervaloPasso = 350;
       } else {
         this.intervaloPasso = 500;
       }
 
       let speed = this.tamanho * (deltaTime / 1000) * fatorVelocidade;
-      let tentativa = p5.Vector.add(
-        this.pos,
-        p5.Vector.mult(direcaoFinal, speed)
-      );
+      let tentativa = objectPool.get();
+      tentativa.add(this.pos).add(p5.Vector.mult(direcaoFinal, speed));
 
-      // Colisão feita por mim, com assistência de vídeos do YouTube.
       const buffer = 3;
+
+      // Colisão. É bem simples, mais funciona.
       let iTent = floor(
         (tentativa.x + buffer * Math.sign(direcaoFinal.x)) / this.tamanho
       );
@@ -102,6 +131,10 @@ class Camera {
       );
 
       if (index(iTent, jTent) < 0) {
+        objectPool.release(frente);
+        objectPool.release(direita);
+        objectPool.release(direcaoFinal);
+        objectPool.release(tentativa);
         return;
       }
 
@@ -111,7 +144,10 @@ class Camera {
         }
       } else if (iTent < i) {
         let celulaEsquerda = grade[index(iTent, j)];
-        if (celulaEsquerda && !celulaEsquerda.temParedeEm("direita")) {
+        if (
+          (celulaEsquerda && !celulaEsquerda.temParedeEm("direita")) ||
+          (!celulaEsquerda && !celulaAtual.temParedeEm("esquerda"))
+        ) {
           this.pos.x = tentativa.x;
         }
       } else {
@@ -131,6 +167,7 @@ class Camera {
         this.pos.z = tentativa.z;
       }
 
+      // Marca os passos.
       let iAtual = floor(this.pos.x / this.tamanho);
       let jAtual = floor(this.pos.z / this.tamanho);
       this.marcarPasso(iAtual, jAtual);
@@ -140,38 +177,22 @@ class Camera {
         this.ultimoPasso = millis();
         this.indicePasso = (this.indicePasso + 1) % passosBuffers.length;
       }
+
+      objectPool.release(tentativa);
     }
-    // código noclip, para testar.
-    if (noclip) {
-      let frente = createVector(sin(this.yaw), 0, cos(this.yaw));
-      let direita = createVector(cos(this.yaw), 0, -sin(this.yaw));
-      let direcaoFinal = createVector();
 
-      if (keyIsDown(87)) direcaoFinal.add(frente); // W
-      if (keyIsDown(83)) direcaoFinal.sub(frente); // S
-      if (keyIsDown(65)) direcaoFinal.add(direita); // A
-      if (keyIsDown(68)) direcaoFinal.sub(direita); // D
-
-      if (keyIsDown(32)) direcaoFinal.y -= 1;
-      if (keyIsDown(SHIFT)) direcaoFinal.y += 1;
-
-      if (direcaoFinal.mag() > 0) {
-        direcaoFinal.normalize();
-        let speed = this.tamanho * (deltaTime / 1000) * 3;
-        let tentativa = p5.Vector.add(
-          this.pos,
-          p5.Vector.mult(direcaoFinal, speed)
-        );
-
-        this.pos.set(tentativa);
-      }
-
-      return;
-    }
+    // libera vetores usados
+    objectPool.release(frente);
+    objectPool.release(direita);
+    objectPool.release(direcaoFinal);
   }
 
+  // Aplica a câmera.
   aplicar() {
-    perspective(this.fov, width / height, 0.5, 1000);
+    let alvoFov = this.estaCorrendo ? this.fov + radians(15) : this.fov;
+
+    this.fovAtual = lerp(this.fovAtual, alvoFov, 0.1);
+    perspective(this.fovAtual, width / height, 0.5, 1000);
 
     let dirX = cos(this.pitch) * sin(this.yaw);
     let dirY = sin(this.pitch);
@@ -188,21 +209,23 @@ class Camera {
       0
     );
   }
+
+  // Funções para conseguir desarmar/regar, quando usa o mouse perto da armadilha/planta
   desarmarTrapComMouse() {
     let iAtual = floor(this.pos.x / this.tamanho);
     let jAtual = floor(this.pos.z / this.tamanho);
     let celulaAtual = grade[index(iAtual, jAtual)];
     if (celulaAtual) celulaAtual.desarmarTrap();
   }
+
   regarPlantaComMouse() {
     let iAtual = floor(this.pos.x / this.tamanho);
     let jAtual = floor(this.pos.z / this.tamanho);
     let celulaAtual = grade[index(iAtual, jAtual)];
     if (celulaAtual && celulaAtual.regarPlanta()) {
       this.stamina = this.staminaMaximo;
-      let barra = document.getElementById("barra-stamina-fill");
-      if (barra) {
-        barra.style.width = "100%";
+      if (this.barraStamina) {
+        this.barraStamina.style.width = "100%";
       }
     }
   }
